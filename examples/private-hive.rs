@@ -1,18 +1,6 @@
 use registry::{Hive, Security};
 use std::convert::TryInto;
 use utfx::U16CString;
-use winapi::um::processthreadsapi::GetCurrentProcess;
-use winapi::um::winnt::TOKEN_ADJUST_PRIVILEGES;
-use winapi::{
-    shared::ntdef::LUID,
-    um::{
-        processthreadsapi::OpenProcessToken,
-        securitybaseapi::AdjustTokenPrivileges,
-        winbase::LookupPrivilegeValueW,
-        winnt::LUID_AND_ATTRIBUTES,
-        winnt::{HANDLE, SE_BACKUP_NAME, SE_PRIVILEGE_ENABLED, SE_RESTORE_NAME, TOKEN_PRIVILEGES},
-    },
-};
 fn main() -> Result<(), std::io::Error> {
     let mut token = std::ptr::null_mut();
     let r = unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &mut token) };

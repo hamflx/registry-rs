@@ -4,8 +4,10 @@ use std::{
 };
 
 use utfx::{U16CString, U16String};
-use winapi::shared::winerror::ERROR_NO_MORE_ITEMS;
-use winapi::um::winreg::{RegEnumKeyExW, RegQueryInfoKeyW};
+use windows_sys::Win32::{
+    Foundation::ERROR_NO_MORE_ITEMS,
+    System::Registry::{RegEnumKeyExW, RegQueryInfoKeyW},
+};
 
 use crate::key::RegKey;
 use crate::sec::Security;
@@ -93,7 +95,7 @@ impl<'a> Iterator for Keys<'a> {
             )
         };
 
-        if result == ERROR_NO_MORE_ITEMS as i32 {
+        if result == ERROR_NO_MORE_ITEMS {
             return None;
         }
 
@@ -146,6 +148,6 @@ impl<'a> Keys<'a> {
             });
         }
 
-        Err(std::io::Error::from_raw_os_error(result))
+        Err(std::io::Error::from_raw_os_error(result as _))
     }
 }

@@ -1,11 +1,10 @@
 use std::{convert::TryInto, fmt::Display};
 
 use utfx::{U16CStr, U16CString};
-use winapi::um::winreg::{
-    HKEY_CLASSES_ROOT, HKEY_CURRENT_CONFIG, HKEY_CURRENT_USER, HKEY_CURRENT_USER_LOCAL_SETTINGS,
-    HKEY_LOCAL_MACHINE, HKEY_PERFORMANCE_DATA, HKEY_USERS,
+use windows_sys::Win32::System::Registry::{
+    RegLoadAppKeyW, HKEY, HKEY_CLASSES_ROOT, HKEY_CURRENT_CONFIG, HKEY_CURRENT_USER,
+    HKEY_CURRENT_USER_LOCAL_SETTINGS, HKEY_LOCAL_MACHINE, HKEY_PERFORMANCE_DATA, HKEY_USERS,
 };
-use winapi::{shared::minwindef::HKEY, um::winreg::RegLoadAppKeyW};
 
 use crate::key::{self, Error};
 use crate::{sec::Security, RegKey};
@@ -131,12 +130,12 @@ where
     P: AsRef<U16CStr>,
 {
     let path = path.as_ref();
-    let mut hkey = std::ptr::null_mut();
+    let mut hkey = 0;
     let result = unsafe { RegLoadAppKeyW(path.as_ptr(), &mut hkey, sec.bits(), 0, 0) };
 
     if result == 0 {
         return Ok(hkey);
     }
 
-    Err(std::io::Error::from_raw_os_error(result))
+    Err(std::io::Error::from_raw_os_error(result as _))
 }

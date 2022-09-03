@@ -1,8 +1,10 @@
 use std::{convert::TryInto, fmt::Debug, ptr::null_mut};
 
 use utfx::{U16CStr, U16CString};
-use winapi::shared::winerror::ERROR_NO_MORE_ITEMS;
-use winapi::um::winreg::{RegEnumValueW, RegQueryInfoKeyW};
+use windows_sys::Win32::{
+    Foundation::ERROR_NO_MORE_ITEMS,
+    System::Registry::{RegEnumValueW, RegQueryInfoKeyW},
+};
 
 use crate::{key::RegKey, Data};
 
@@ -117,14 +119,14 @@ impl<'a> Iterator for Values<'a> {
             )
         };
 
-        if result == ERROR_NO_MORE_ITEMS as i32 {
+        if result == ERROR_NO_MORE_ITEMS {
             return None;
         }
 
         if result != 0 {
             return Some(Err(Error::Unknown(
                 self.index,
-                std::io::Error::from_raw_os_error(result),
+                std::io::Error::from_raw_os_error(result as _),
             )));
         }
 
@@ -180,6 +182,6 @@ impl<'a> Values<'a> {
             });
         }
 
-        Err(std::io::Error::from_raw_os_error(result))
+        Err(std::io::Error::from_raw_os_error(result as _))
     }
 }

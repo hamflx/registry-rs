@@ -6,8 +6,9 @@ use std::{
 };
 
 use utfx::U16CString;
-use winapi::shared::minwindef::HKEY;
-use winapi::um::winreg::{RegDeleteValueW, RegQueryValueExW, RegSetValueExW};
+use windows_sys::Win32::System::Registry::{
+    RegDeleteValueW, RegQueryValueExW, RegSetValueExW, HKEY,
+};
 
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -257,7 +258,7 @@ where
     };
 
     if result != 0 {
-        return Err(Error::from_code(result, value_name.to_string_lossy()));
+        return Err(Error::from_code(result as _, value_name.to_string_lossy()));
     }
 
     Ok(())
@@ -273,7 +274,7 @@ where
     let result = unsafe { RegDeleteValueW(base, value_name.as_ptr()) };
 
     if result != 0 {
-        return Err(Error::from_code(result, value_name.to_string_lossy()));
+        return Err(Error::from_code(result as _, value_name.to_string_lossy()));
     }
 
     Ok(())
@@ -301,7 +302,7 @@ where
     };
 
     if result != 0 {
-        return Err(Error::from_code(result, value_name.to_string_lossy()));
+        return Err(Error::from_code(result as _, value_name.to_string_lossy()));
     }
 
     // sz is size in bytes, we'll make a u16 vec.
@@ -321,7 +322,7 @@ where
     };
 
     if result != 0 {
-        return Err(Error::from_code(result, value_name.to_string_lossy()));
+        return Err(Error::from_code(result as _, value_name.to_string_lossy()));
     }
 
     parse_value_type_data(ty, buf)

@@ -2,14 +2,12 @@ use std::{
     convert::{Infallible, TryInto},
     fmt::Display,
     io,
-    ptr::null_mut,
 };
 
 use utfx::{U16CStr, U16CString};
-use winapi::shared::minwindef::HKEY;
-use winapi::um::winreg::{
+use windows_sys::Win32::System::Registry::{
     RegCloseKey, RegCreateKeyExW, RegDeleteKeyW, RegDeleteTreeW, RegOpenCurrentUser, RegOpenKeyExW,
-    RegSaveKeyExW,
+    RegSaveKeyExW, HKEY,
 };
 
 use crate::iter;
@@ -199,7 +197,7 @@ impl RegKey {
     }
 
     pub fn open_current_user(sec: Security) -> Result<RegKey, Error> {
-        let mut hkey = null_mut();
+        let mut hkey = 0;
 
         let result = unsafe { RegOpenCurrentUser(sec.bits(), &mut hkey) };
 
@@ -213,7 +211,7 @@ impl RegKey {
         }
 
         let path = "<current user>".to_string();
-        Err(Error::from_code(result, path))
+        Err(Error::from_code(result as _, path))
     }
 }
 
@@ -223,7 +221,7 @@ where
     P: AsRef<U16CStr>,
 {
     let path = path.as_ref();
-    let mut hkey = std::ptr::null_mut();
+    let mut hkey = 0;
     let result = unsafe { RegOpenKeyExW(base, path.as_ptr(), 0, sec.bits(), &mut hkey) };
 
     if result == 0 {
@@ -231,7 +229,7 @@ where
     }
 
     let path = path.to_string_lossy();
-    Err(Error::from_code(result, path))
+    Err(Error::from_code(result as _, path))
 }
 
 #[inline]
@@ -247,7 +245,7 @@ where
     }
 
     let path = path.to_string_lossy();
-    Err(Error::from_code(result, path))
+    Err(Error::from_code(result as _, path))
 }
 
 #[inline]
@@ -268,7 +266,7 @@ where
     }
 
     let path = path.to_string_lossy();
-    Err(Error::from_code(result, path))
+    Err(Error::from_code(result as _, path))
 }
 
 #[inline]
@@ -277,7 +275,7 @@ where
     P: AsRef<U16CStr>,
 {
     let path = path.as_ref();
-    let mut hkey = std::ptr::null_mut();
+    let mut hkey = 0;
     let result = unsafe {
         RegCreateKeyExW(
             base,
@@ -297,7 +295,7 @@ where
     }
 
     let path = path.to_string_lossy();
-    Err(Error::from_code(result, path))
+    Err(Error::from_code(result as _, path))
 }
 
 #[cfg(test)]
