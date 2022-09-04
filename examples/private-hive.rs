@@ -1,8 +1,21 @@
-use registry::{Hive, Security};
 use std::convert::TryInto;
+
+use registry::{Hive, Security};
 use utfx::U16CString;
+use windows_sys::Win32::{
+    Foundation::{HANDLE, LUID},
+    Security::{
+        AdjustTokenPrivileges, LookupPrivilegeValueW, LUID_AND_ATTRIBUTES, SE_PRIVILEGE_ENABLED,
+        TOKEN_ADJUST_PRIVILEGES, TOKEN_PRIVILEGES,
+    },
+    System::{
+        SystemServices::{SE_BACKUP_NAME, SE_RESTORE_NAME},
+        Threading::{GetCurrentProcess, OpenProcessToken},
+    },
+};
+
 fn main() -> Result<(), std::io::Error> {
-    let mut token = std::ptr::null_mut();
+    let mut token = 0;
     let r = unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &mut token) };
     if r == 0 {
         return Err(std::io::Error::last_os_error());
